@@ -1,0 +1,28 @@
+- name: Ansible playbook
+  become: true
+  hosts: cloud-ru-host
+
+  tasks:
+  - name: Add the user 'cloudru' with password 'cloudpass'
+    ansible.builtin.user:
+      name: cloudru
+      shell: /bin/bash
+      # ansible cloud-ru-host -i inventory.yml -m debug -a "msg={{ 'cloudpass' | password_hash('sha512', 'mysecretsalt') }}"
+      password: $6$mysecretsalt$mn6E/B9o/DxKh7R.ltiRG29eyXkpBAb1bcDlkD9ClwsBAGc6dwjk4qaXFhRjLMobESUXYXLOs32tixnfzfpkl0
+
+  - name: Allow ssh key auth 
+    ansible.builtin.lineinfile:
+      path: /etc/ssh/sshd_config 
+      regexp: '^#?PubkeyAuthentication'
+      line: 'PubkeyAuthentication yes'
+
+  - name: Disable root ssh access
+    ansible.builtin.lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^#?PermitRootLogin'
+      line: 'PermitRootLogin no'
+
+  - name: Copy public ssh key for cloudru user 
+    ansible.posix.authorized_key:
+      user: cloudru
+      key: "{{ lookup('file', 'id_rsa.pub') }}"

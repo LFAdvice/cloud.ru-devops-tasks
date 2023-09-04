@@ -1,0 +1,6 @@
+all:
+  hosts:
+    cloud-ru-host:
+      ansible_host: 192.168.1.130
+      ansible_user: username
+      ansible_ssh_pass: password
